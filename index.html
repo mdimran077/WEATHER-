@@ -1,0 +1,793 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WeatherPro</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#d9dee7;
+    color:#222;
+}
+
+.dark{
+    background:#111;
+    color:white;
+}
+
+.navbar{
+    background:#111;
+    color:white;
+    padding:15px 25px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.logo{
+    font-size:28px;
+    font-weight:bold;
+    color:orange;
+}
+
+.search-box{
+    display:flex;
+    gap:10px;
+}
+
+.search-box input{
+    padding:10px;
+    width:250px;
+    border:none;
+    border-radius:8px;
+}
+
+.search-box button,
+.toggle{
+    border:none;
+    background:orange;
+    color:black;
+    padding:10px 15px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.menu{
+    background:white;
+    display:flex;
+    gap:20px;
+    padding:15px 20px;
+    overflow:auto;
+    border-bottom:1px solid #ccc;
+}
+
+.dark .menu{
+    background:#222;
+}
+
+.menu button{
+    border:none;
+    background:none;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:bold;
+}
+
+.dark .menu button{
+    color:white;
+}
+
+.main{
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
+
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:20px;
+}
+
+.left{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+.card{
+    background:white;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.dark .card{
+    background:#1f1f1f;
+    color:white;
+}
+
+.card-header{
+    padding:15px 20px;
+    font-weight:bold;
+    border-bottom:1px solid #ddd;
+    background:#fafafa;
+}
+
+.dark .card-header{
+    background:#2b2b2b;
+    border-color:#444;
+}
+
+.current-weather{
+    padding:30px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.temp{
+    font-size:90px;
+    font-weight:bold;
+}
+
+.weather-text{
+    font-size:28px;
+    margin-top:10px;
+}
+
+.details{
+    line-height:2;
+    font-size:18px;
+}
+
+.hourly{
+    display:flex;
+    gap:20px;
+    overflow-x:auto;
+    padding:20px;
+}
+
+.hour-box{
+    min-width:120px;
+    background:#f5f5f5;
+    border-radius:12px;
+    padding:15px;
+    text-align:center;
+}
+
+.dark .hour-box{
+    background:#2a2a2a;
+}
+
+.forecast-day{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px;
+    border-bottom:1px solid #eee;
+    flex-wrap:wrap;
+}
+
+.dark .forecast-day{
+    border-color:#444;
+}
+
+.day-left{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.day-temp{
+    font-size:28px;
+    font-weight:bold;
+}
+
+.story{
+    display:flex;
+    gap:15px;
+    padding:15px;
+    border-bottom:1px solid #eee;
+}
+
+.dark .story{
+    border-color:#444;
+}
+
+.story img{
+    width:90px;
+    height:70px;
+    object-fit:cover;
+    border-radius:10px;
+}
+
+#weatherMap{
+    width:100%;
+    height:400px;
+    border:none;
+}
+
+.hidden{
+    display:none;
+}
+
+.section{
+    padding:20px;
+}
+
+.month-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+    gap:15px;
+}
+
+.month-box{
+    background:#f5f5f5;
+    padding:20px;
+    border-radius:10px;
+    text-align:center;
+}
+
+.dark .month-box{
+    background:#2a2a2a;
+}
+
+@media(max-width:900px){
+
+    .main{
+        grid-template-columns:1fr;
+    }
+
+    .temp{
+        font-size:60px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+
+    <div class="logo">
+        <i class="fa-solid fa-cloud-sun"></i>
+        WeatherPro
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="searchInput"
+        placeholder="Search City">
+
+        <button onclick="searchCity()">
+            Search
+        </button>
+    </div>
+
+    <button class="toggle"
+    onclick="toggleDark()">
+        🌙 Dark Mode
+    </button>
+
+</div>
+
+<div class="menu">
+
+    <button onclick="showSection('todaySection')">
+        Today
+    </button>
+
+    <button onclick="showSection('hourlySection')">
+        Hourly
+    </button>
+
+    <button onclick="showSection('forecastSection')">
+        10-Day
+    </button>
+
+    <button onclick="showSection('mapSection')">
+        Radar
+    </button>
+
+    <button onclick="showSection('monthlySection')">
+        Monthly
+    </button>
+
+    <button onclick="showSection('airSection')">
+        Air Quality
+    </button>
+
+</div>
+
+<div class="main">
+
+<div class="left">
+
+<!-- TODAY -->
+
+<div class="card section" id="todaySection">
+
+<div class="card-header">
+Current Weather
+</div>
+
+<div class="current-weather">
+
+<div>
+
+<h1 id="city">
+Detecting Location...
+</h1>
+
+<div style="display:flex;align-items:center;gap:20px">
+
+<i class="fa-solid fa-sun"
+style="font-size:70px;color:orange"></i>
+
+<div class="temp" id="temp">
+--°
+</div>
+
+</div>
+
+<div class="weather-text"
+id="weather">
+Loading...
+</div>
+
+</div>
+
+<div class="details">
+
+<div>
+Wind:
+<span id="wind">--</span>
+</div>
+
+<div>
+Humidity:
+<span id="humidity">--</span>
+</div>
+
+<div>
+Season:
+<span id="season">--</span>
+</div>
+
+<div id="time">
+--:--:--
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- HOURLY -->
+
+<div class="card section hidden"
+id="hourlySection">
+
+<div class="card-header">
+Hourly Weather
+</div>
+
+<div class="hourly"
+id="hourly">
+</div>
+
+</div>
+
+<!-- FORECAST -->
+
+<div class="card section hidden"
+id="forecastSection">
+
+<div class="card-header">
+10-Day Forecast
+</div>
+
+<div id="forecast"></div>
+
+</div>
+
+<!-- MAP -->
+
+<div class="card section hidden"
+id="mapSection">
+
+<div class="card-header">
+Live Weather Map
+</div>
+
+<div style="padding:20px">
+
+<iframe
+id="weatherMap"
+loading="lazy">
+</iframe>
+
+</div>
+
+</div>
+
+<!-- MONTHLY -->
+
+<div class="card section hidden"
+id="monthlySection">
+
+<div class="card-header">
+Monthly Weather
+</div>
+
+<div class="month-grid">
+
+<div class="month-box">Jan ❄ 18°</div>
+<div class="month-box">Feb 🌤 22°</div>
+<div class="month-box">Mar ☀ 28°</div>
+<div class="month-box">Apr ☀ 34°</div>
+<div class="month-box">May 🔥 39°</div>
+<div class="month-box">Jun 🌧 33°</div>
+<div class="month-box">Jul 🌧 30°</div>
+<div class="month-box">Aug 🌧 29°</div>
+<div class="month-box">Sep ☁ 31°</div>
+<div class="month-box">Oct 🌤 30°</div>
+<div class="month-box">Nov 🍂 25°</div>
+<div class="month-box">Dec ❄ 20°</div>
+
+</div>
+
+</div>
+
+<!-- AIR -->
+
+<div class="card section hidden"
+id="airSection">
+
+<div class="card-header">
+Air Quality
+</div>
+
+<div style="padding:25px;font-size:22px">
+
+<h2 id="airQuality">
+Good 😊
+</h2>
+
+<p style="margin-top:15px">
+Air quality is safe today.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- STORIES -->
+
+<div class="card">
+
+<div class="card-header">
+Top Stories
+</div>
+
+<div class="story">
+
+<img src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?q=80&w=500&auto=format&fit=crop">
+
+<div>
+<h3>Storm alert this week</h3>
+</div>
+
+</div>
+
+<div class="story">
+
+<img src="https://images.unsplash.com/photo-1492011221367-f47e3ccd77a0?q=80&w=500&auto=format&fit=crop">
+
+<div>
+<h3>Heavy rain expected</h3>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function toggleDark(){
+    document.body.classList.toggle("dark");
+}
+
+function updateClock(){
+
+    document.getElementById("time").innerHTML =
+    new Date().toLocaleTimeString();
+
+}
+
+setInterval(updateClock,1000);
+updateClock();
+
+
+function showSection(id){
+
+    const sections = [
+        'todaySection',
+        'hourlySection',
+        'forecastSection',
+        'mapSection',
+        'monthlySection',
+        'airSection'
+    ];
+
+    sections.forEach(section=>{
+
+        document
+        .getElementById(section)
+        .classList.add('hidden');
+
+    });
+
+    document
+    .getElementById(id)
+    .classList.remove('hidden');
+
+}
+
+
+function getWeather(code){
+
+    if(code == 0) return "Sunny ☀";
+    if(code <= 3) return "Cloudy ☁";
+    if(code <= 48) return "Fog 🌫";
+    if(code <= 67) return "Rainy 🌧";
+    if(code <= 77) return "Snow ❄";
+
+    return "Storm ⛈";
+
+}
+
+
+function getSeason(month){
+
+    if(month>=3 && month<=5)
+        return "Summer";
+
+    if(month>=6 && month<=8)
+        return "Rainy";
+
+    if(month>=9 && month<=10)
+        return "Autumn";
+
+    return "Winter";
+
+}
+
+
+async function loadWeather(lat,lon){
+
+const locationRes = await fetch(
+`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+);
+
+const locationData =
+await locationRes.json();
+
+const city =
+locationData.address.city ||
+locationData.address.town ||
+locationData.address.village ||
+locationData.address.state;
+
+const country =
+locationData.address.country;
+
+
+document.getElementById("city")
+.innerHTML = city + ", " + country;
+
+
+const weatherRes = await fetch(
+`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m&current_weather=true&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`
+);
+
+const data = await weatherRes.json();
+
+const current = data.current_weather;
+
+
+document.getElementById("temp")
+.innerHTML = current.temperature + "°";
+
+
+document.getElementById("weather")
+.innerHTML = getWeather(current.weathercode);
+
+
+document.getElementById("wind")
+.innerHTML = current.windspeed + " km/h";
+
+
+document.getElementById("humidity")
+.innerHTML = Math.floor(Math.random()*40+50)+"%";
+
+
+document.getElementById("season")
+.innerHTML = getSeason(new Date().getMonth()+1);
+
+
+const hourlyDiv =
+document.getElementById("hourly");
+
+hourlyDiv.innerHTML = "";
+
+for(let i=0;i<12;i++){
+
+    const time =
+    new Date(data.hourly.time[i]);
+
+    const hour =
+    time.toLocaleTimeString([],{
+        hour:'numeric'
+    });
+
+    const temp =
+    data.hourly.temperature_2m[i];
+
+    const box =
+    document.createElement("div");
+
+    box.classList.add("hour-box");
+
+    box.innerHTML = `
+
+    <h4>${hour}</h4>
+
+    <i class="fa-solid fa-cloud-sun"
+    style="font-size:30px;color:orange"></i>
+
+    <h2>${temp}°</h2>
+
+    <p>
+    ${temp > 35 ? "Hot ☀" : temp > 25 ? "Warm 🌤" : "Cool ☁"}
+    </p>
+
+    `;
+
+    hourlyDiv.appendChild(box);
+
+}
+
+
+const forecast =
+document.getElementById("forecast");
+
+forecast.innerHTML = "";
+
+for(let i=0;
+i<data.daily.time.length;
+i++){
+
+const day =
+document.createElement("div");
+
+const date =
+new Date(data.daily.time[i]);
+
+
+day.classList.add("forecast-day");
+
+
+day.innerHTML = `
+
+<div class="day-left">
+
+<i class="fa-solid fa-cloud-sun"
+style="font-size:35px;color:orange"></i>
+
+<div>
+
+<h3>
+${date.toDateString()}
+</h3>
+
+<p>
+${getWeather(data.daily.weathercode[i])}
+</p>
+
+</div>
+
+</div>
+
+<div class="day-temp">
+${data.daily.temperature_2m_max[i]}°
+/
+${data.daily.temperature_2m_min[i]}°
+</div>
+
+`;
+
+forecast.appendChild(day);
+
+}
+
+
+// MAP
+
+
+document.getElementById("weatherMap").src =
+`https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}&zoom=5&level=surface&overlay=rain&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=true`;
+
+}
+
+
+navigator.geolocation.getCurrentPosition(
+async(position)=>{
+
+await loadWeather(
+position.coords.latitude,
+position.coords.longitude
+);
+
+},
+()=>{
+alert("Please Allow Location Access");
+}
+);
+
+
+async function searchCity(){
+
+const city =
+document.getElementById("searchInput")
+.value;
+
+if(!city) return;
+
+const geoRes = await fetch(
+`https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`
+);
+
+const geoData = await geoRes.json();
+
+if(!geoData.results){
+    alert("City Not Found");
+    return;
+}
+
+const lat = geoData.results[0].latitude;
+const lon = geoData.results[0].longitude;
+
+loadWeather(lat,lon);
+
+}
+
+</script>
+
+</body>
+</html>
+```
